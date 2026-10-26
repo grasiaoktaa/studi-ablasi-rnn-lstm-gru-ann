@@ -32,8 +32,8 @@
 
 % Satu blok per anggota (maks. 3). Hapus blok yang tidak dipakai.
 \author{
-\IEEEauthorblockN{Nama Anggota 1}
-\IEEEauthorblockA{NIM 1221400xx\\
+\IEEEauthorblockN{Grasia Okta Adelia}
+\IEEEauthorblockA{NIM 124400059\\
 Teknik Telekomunikasi, ITERA\\
 email@student.itera.ac.id}
 \and
@@ -60,13 +60,59 @@ prediksi trafik seluler, RNN, LSTM, GRU, studi ablasi
 
 % ---------------------------------------------------------------------
 \section{Pendahuluan}
-\petunjuk{Mengapa operator perlu meramal trafik per sel? Mengapa model sekuensial (RNN, LSTM \cite{hochreiter1997lstm}, GRU \cite{cho2014gru}) dibandingkan dengan ANN? Apa itu studi ablasi dan mengapa penting? Tutup dengan daftar kontribusi laporan ini (2--3 butir). Maks. 0,5 kolom.}
+\petunjuk{Prediksi trafik seluler merupakan salah satu aspek penting
+dalam pengelolaan jaringan telekomunikasi. Informasi mengenai
+pola penggunaan jaringan dapat membantu operator memperkirakan
+kebutuhan kapasitas, mengoptimalkan alokasi sumber daya, dan
+menjaga kualitas layanan. Namun, trafik internet memiliki pola
+yang berubah terhadap waktu sehingga diperlukan metode yang
+mampu mempelajari hubungan temporal pada data.
+
+Artificial Neural Network (ANN) dapat mempelajari hubungan
+nonlinear antarfitur, tetapi tidak secara eksplisit memodelkan
+urutan temporal seperti arsitektur rekuren. Recurrent Neural
+Network (RNN) dirancang untuk memproses data berurutan,
+sedangkan Long Short-Term Memory (LSTM) \cite{hochreiter1997lstm}
+dan Gated Recurrent Unit (GRU) \cite{cho2014gru} menggunakan
+mekanisme gerbang untuk membantu mempelajari dependensi temporal.
+Meskipun demikian, kinerja setiap arsitektur juga dipengaruhi
+oleh konfigurasi hiperparameter yang digunakan.
+
+Penelitian ini membandingkan ANN, RNN, LSTM, dan GRU untuk
+prediksi trafik internet per jam menggunakan data Telecom Italia
+di Kota Milan. Studi ablasi dilakukan untuk mengevaluasi pengaruh
+panjang jendela masukan, ukuran hidden, jumlah lapisan,
+learning rate, dan kelompok fitur terhadap kinerja prediksi.
+Konfigurasi model dievaluasi menggunakan beberapa seed agar
+variasi hasil pelatihan dapat diamati.
+
+Kontribusi penelitian ini meliputi: (1) perbandingan kinerja
+empat arsitektur pada tugas prediksi trafik; (2) analisis
+pengaruh hiperparameter dan fitur melalui eksperimen ablasi;
+serta (3) evaluasi konfigurasi terbaik pada lokasi kelompok
+untuk mengamati kemampuan generalisasi model.}
 
 % ---------------------------------------------------------------------
 \section{Data dan Metode}
 
 \subsection{Dataset}
-\petunjuk{Telecom Italia Big Data Challenge \cite{barlacchi2015milan}, versi per jam dari \cite{zhang2021fedda}: periode, resolusi, fitur. Sebutkan kotak Duomo (5060) dan lokasi kelompok (kode, nama, nomor kotak). Gambar~\ref{fig:peta} boleh dipakai.}
+\petunjuk{Penelitian ini menggunakan dataset trafik jaringan seluler
+dari Telecom Italia Big Data Challenge yang mencakup aktivitas
+internet per jam di Kota Milan \cite{barlacchi2015milan}.
+Data yang dianalisis meliputi trafik internet (\textit{net}),
+panggilan (\textit{call}), dan SMS (\textit{sms}). Selain itu,
+fitur waktu ditambahkan untuk merepresentasikan pola periodik
+harian dan mingguan menggunakan transformasi sinus dan kosinus
+pada jam serta hari dalam seminggu.
+
+Eksperimen dilakukan pada lokasi Duomo sebagai lokasi acuan
+dan lokasi kelompok, yaitu Stadio San Siro di Milan, dengan
+kode lokasi 3 dan nomor kotak 5738. Data Duomo dibaca dari
+berkas \texttt{milano\_duomo\_5060.csv}, sedangkan data lokasi
+kelompok dibaca dari berkas \texttt{milano\_tugas\_10\_lokasi.csv}.
+Penggunaan kedua lokasi tersebut memungkinkan perbandingan
+kinerja model pada lokasi dengan karakteristik trafik yang
+berbeda.}
 
 \begin{figure}[t]
   \centering
@@ -76,10 +122,28 @@ prediksi trafik seluler, RNN, LSTM, GRU, studi ablasi
 \end{figure}
 
 \subsection{Pembagian Data dan Praproses}
-\petunjuk{Pembagian berdasarkan waktu (train / val / test / Natal), standarisasi dengan statistik sebelum minggu validasi, \textit{windowing}. Jelaskan mengapa data deret waktu tidak boleh diacak.}
+\petunjuk{Dataset dibagi berdasarkan urutan waktu menjadi data
+pelatihan (11 November--8 Desember 2013), validasi
+(9--15 Desember 2013), pengujian (16--22 Desember 2013),
+dan periode Natal mulai 23 Desember 2013 hingga akhir
+data yang tersedia. Pembagian kronologis digunakan untuk
+mempertahankan urutan temporal dan mencegah kebocoran
+informasi dari masa depan ke proses pelatihan.
+
+Sebelum digunakan, fitur distandarisasi menggunakan
+rata-rata dan simpangan baku yang dihitung dari data
+sebelum periode validasi. Selanjutnya, data dibentuk
+menjadi jendela masukan sepanjang $W$ jam untuk
+memprediksi trafik selama $H$ jam. Sampel dimasukkan
+ke suatu subset berdasarkan waktu target terakhirnya,
+sehingga evaluasi mengikuti periode yang telah ditentukan.}
 
 \subsection{Model dan Konfigurasi Acuan}
-\petunjuk{Uraikan ANN, RNN, LSTM, GRU secara singkat (tanpa menyalin slide). Sajikan konfigurasi acuan dalam Tabel~\ref{tab:acuan}.}
+\petunjuk{Penelitian ini membandingkan empat arsitektur jaringan saraf, yaitu Artificial Neural Network (ANN), Recurrent Neural Network (RNN), Long Short-Term Memory (LSTM), dan Gated Recurrent Unit (GRU). ANN digunakan sebagai model pembanding tanpa mekanisme rekuren, sedangkan RNN, LSTM, dan GRU digunakan untuk mempelajari pola temporal pada data trafik. Implementasi model disesuaikan dengan karakteristik masing-masing arsitektur.
+
+Konfigurasi acuan menggunakan panjang jendela masukan sebesar 24 jam, horizon prediksi satu jam, seluruh kelompok fitur, dan ukuran batch 64. Pelatihan menggunakan optimizer Adam dengan *learning rate* sebesar 0,001 dan fungsi kerugian *mean squared error* (MSE). Nilai *dropout* ditetapkan sebesar 0, sedangkan jumlah epoch maksimum adalah 300 dengan *early stopping* berdasarkan kinerja validasi dan nilai *patience* sebesar 30.
+
+Ukuran hidden dan jumlah lapisan ditetapkan berdasarkan arsitektur model. ANN menggunakan 32 unit hidden dengan dua lapisan, sedangkan RNN menggunakan 68 unit hidden, LSTM 33 unit hidden, dan GRU 38 unit hidden. Ketiga model rekuren tersebut masing-masing menggunakan satu lapisan. Konfigurasi ini digunakan sebagai acuan dalam eksperimen ablasi untuk mengamati pengaruh perubahan parameter terhadap kinerja prediksi.}
 
 \begin{table}[t]
   \centering
